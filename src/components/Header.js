@@ -1,33 +1,23 @@
 import React from 'react'
-import { connect } from 'react-redux'
+import { connect } from 'react-redux';
 
-const ENTER_KEY_CODE = 13;
-
-// class Header extends React.Component {
-    // const addTodo = this.props.addTodo
-    // const { addTodo } = this.props
-// }
-// 可选：添加todo后，光标重新聚焦
-const Header = ({ addTodo }) => {
-  return (
-    <header className="header">
-      <h1>todos</h1>
-      <input className="new-todo"
-        placeholder="What needs to be done?"
-        autoFocus
-        onKeyPress={(e)=> {
-          const label = e.target.value.trim()
-          if(e.charCode === ENTER_KEY_CODE && label !== '') {
-            addTodo(label)
-            e.target.value = ''
-          }
-        }} />
-    </header>
-  )
+class Header extends React.Component {
+  render(){
+    return (<header className="header">
+  <h1>todos</h1>
+  <input className="new-todo" placeholder="What needs to be done?"
+         onKeyPress={(event) => {
+           let label = event.target.value.trim();
+           if(event.charCode === 13 && label.length !== 0){
+             this.props.addTodo(label);
+             event.target.value='';
+           }
+         }}/></header>)
+        }
 }
 
-const mapStateToProps = () => ({})
-const mapDispatchToProps = (dispatch) => ({
+const emptyMap = () => ({})
+const mapDispachToState = (dispatch) => ({
   addTodo: (label) => {
     dispatch({
       type: "ADD_TODO",
@@ -36,4 +26,6 @@ const mapDispatchToProps = (dispatch) => ({
   }
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(Header);
+
+export default connect(emptyMap, mapDispachToState)(Header);
+

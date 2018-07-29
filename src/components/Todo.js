@@ -1,69 +1,81 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux'
+import React from 'react'
+import { connect } from 'react-redux';
 
-class Todo extends Component {
-	state = {
-		editing: false
-	}
 
-	toggleEditing = ()=> {
-		const editing = !this.state.editing
-		this.setState({
-			editing
-		})
-	}
+class Todo extends React.Component {
+    constructor(props){
+        super(props);
+        this.state={edit:false, temptext:""}
+    }
 
-	handleKeyPress = (e, idx) => {
-		if(e.charCode === 13 && e.target.value.trim() !== '') {
-			e.target.value = e.target.value.trim();
-			this.props.updateTodo(idx, e.target.value)	
-			this.toggleEditing()
-		}
-	}
-
-	render() {
-		const { label, completed=false, toggleTodo, idx } = this.props
-		let clazz = completed ? 'completed' : '';
-		if(this.state.editing) {
-			clazz += ' editing'
-		}
-		
-		return (
-			<li className={clazz}>
-				<div className="view">
-					<input className="toggle"
-						type="checkbox"
-						checked={completed}
-						onChange={() => {
-							toggleTodo(idx)
-						}} />
-					<label onDoubleClick={this.toggleEditing}>{label}</label>
-					<button className="destroy"></button>
-				</div>
-				<input className="edit"
-					defaultValue={label}
-					onKeyPress={(e)=> {
-						this.handleKeyPress(e, idx)
-					}} />
-			</li>
-		)
-	}
+    changeEdting = (check) => {
+        let newState = [...this.state];
+        newState.edit = check;
+        this.setState(newState);
+    }
+    changeText = (text) => {
+        let newState = [...this.state];
+        newState.temptext = text;
+        this.setState(newState);
+    }
+    render(){
+        let clazzName;
+        if((this.props.display === "Active" && this.props.elm.completed) || (this.props.display === "Completed" && !this.props.elm.completed)){
+            clazzName = "hidden";
+        }
+        else if(this.state.edit){
+            clazzName = "editing";
+        }
+        else if(this.props.elm.completed){
+            clazzName = "completed";
+        }
+        else{
+            clazzName = '';
+        }
+        return (<li className={clazzName} id={this.props.id}>
+        <div className="view">
+            <input className="toggle" type="checkbox" checked={this.props.elm.completed} onChange={() => {this.props.toggleTodo(this.props.id)}}/>
+            <label onDoubleClick={() => {this.changeEdting(true)}}>{this.props.elm.label}</label>
+            <button className="destroy" onClick={() => {this.props.destoryElm(this.props.id)}}></button>
+        </div>
+        <input className="edit" value={this.state.temptext} 
+        onChange={(event) =>{this.changeText(event.target.value)}} 
+        onKeyPress={(event) => {
+            if(event.charCode === 13){
+                this.props.getNewText(this.props.id, this.state.temptext);
+                this.changeEdting(false);
+            }
+        }}
+        autoFocus onBlur={() => {this.changeEdting(false)}}/>
+    </li>)
+    }
 }
 
-const mapStateToProps = () => ({})
-
-const mapDispatchToProps = (dispatch) => ({
-	toggleTodo: (idx) => {
-		dispatch({
-			type: 'TOGGLE_TODO',
-			idx
-		})
-	},
-	updateTodo: (idx, label) => {
-		dispatch({
-			type: 'UPDATE_TODO',
-			data: {idx, label}
-		})
-	}
+const mapPropsToState = (state) => ({
+    display:state.display
 })
-export default connect(mapStateToProps, mapDispatchToProps)(Todo);
+const mapDispatchToState = (dispatch) => ({
+    destoryElm:(id) => {
+        dispatch({
+            type:"DESTORY_ELM",
+            data:id
+        })
+    },
+
+    toggleTodo:(id) => {
+        dispatch({
+            type:"CHOOSE_TODO",
+            data:id
+        })
+    },
+
+    getNewText:(id, text) => {
+        dispatch({
+            type:"GET_NEW_TEXT",
+            data:{id:id, text:text}
+        })
+    }
+
+})
+
+export default connect(mapPropsToState, mapDispatchToState)(Todo)

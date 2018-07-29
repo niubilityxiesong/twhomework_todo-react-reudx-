@@ -1,38 +1,61 @@
-const initState = [
-  { label: 'javascript', completed: true },
-  { label: 'java' }
-]
+import { EMLINK } from "constants";
+import { combineReducers } from "../../node_modules/redux";
 
-const todos = (state = initState, action) => {
-  switch (action.type) {
-    case 'TOGGLE_TODO':
-      return state.map((item, idx) => {
-        return Object.assign({}, item, {
-          completed: idx === action.idx ? !item.completed : item.completed
-        })
-      })
-    case 'TOGGLE_ALL':
-      return state.map((item) => {
-        return Object.assign({}, item, {
-          completed: action.data
-        })
-      })
-    case 'ADD_TODO':
-      const newState = [...state];
-      newState.push(action.data);
-      return newState;
-    case 'UPDATE_TODO':
-      return state.map((item, idx) => {
-        const { label: newLabel, idx: newIdx } = action.data
-        return Object.assign({}, item, {
-          label: idx === newIdx ? newLabel : item.label
-        })
-      })
-    case 'CLEAR_COMPLETED':
-      return state.filter(todo => !todo.completed)
-    default:
-      return state
-  }
+const initState = {
+    todo:[{label:"javascripe", completed:true},
+        {label:"java", completed:false}],
+    display:"All"
 }
 
-export default todos
+const todos = (state = initState.todo, action) => {
+    if(action.type === 'ADD_TODO'){
+        let newState = [...state];
+        newState.push(action.data);
+        return newState;
+    }
+    if(action.type === 'DESTORY_ELM'){
+        let newState = [...state];
+        newState.splice(action.data,1);
+        return newState;
+    }
+    if(action.type === 'CHOOSE_TODO'){
+        // let newState = [...state];
+        // newState[action.data].completed = !newState[action.data].completed
+        return state.map((item, idx) => {
+            return Object.assign({}, item, {
+              completed: idx === action.data ? !item.completed : item.completed
+            })
+          })
+    }
+    if(action.type === 'TOGGLE_ALL'){
+        return state.map(elm => {
+            return Object.assign({}, elm, elm.completed=action.data);
+        })
+    }
+    if(action.type === 'CLEAR_COMPLETED'){
+        let newState=[...state];
+        return newState.filter(elm => !elm.completed);
+    }
+    if(action.type === 'GET_NEW_TEXT'){
+        return state.map((elm, id) => {
+            return Object.assign({}, elm, {
+                label: id === action.data.id ? action.data.text : elm.label
+            })
+        })
+    }
+    return state;
+}
+
+const displaySelect = (state = initState.display, action) => {
+    if(action.type === 'DISPLAT_PATTERN'){
+        state=action.data;
+    }
+    return state;
+}
+
+const reducer = combineReducers({
+    todos:todos,
+    display:displaySelect
+})
+
+export default reducer
